@@ -9,9 +9,12 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -27,12 +30,17 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
+
+
+import com.mysql.jdbc.Connection;
+
 import khanhcn.duanquanlytiendien.DAO.QuanLyTienDienDAO;
 import khanhcn.duanquanlytiendien.entity.KhachHang;
 
 public class KhachHangUi extends JFrame {
 
-	QuanLyTienDienDAO QLTD = new QuanLyTienDienDAO();
+	static QuanLyTienDienDAO QLTD = new QuanLyTienDienDAO();
+	static Connection conn = QLTD.getConnect("localhost", "khanhcn_ffse1701011", "khanhcn", "123456");
 	ArrayList<KhachHang> dsKH = new ArrayList<KhachHang>();
 
 	DefaultTableModel dm;
@@ -48,6 +56,15 @@ public class KhachHangUi extends JFrame {
 	JTextField txtQuan;
 	JTextField txtDienThoai;
 	JTextField txtEmail;
+	
+	//txt Biên Lai 
+	JTextField tfMaKH;
+	JTextField tfTenKH;
+	JTextField tfDiaChi;
+	JTextField tfPhuong;
+	JTextField tfQuan;
+	JTextField tfDienThoai;
+	JTextField tfEmail;
 
 	JButton btnThem = new JButton("      Thêm");
 	JButton btnSua = new JButton("   Sửa");
@@ -84,14 +101,20 @@ public class KhachHangUi extends JFrame {
 
 	}
 
+	
+
 	public void hienThiDS() {
+
 		dsKH = QLTD.getDSKhachHang();
+		dm.setRowCount(0);
+		;
 		for (KhachHang x : dsKH) {
-			dm.addRow(new String[] { x.getMaKH(), x.getHoTen(), x.getDiaChi(), x.getMaCT(), x.getPhuong(), x.getQuan(),
+			dm.addRow(new String[] { x.getMaKH(), x.getHoTen(), x.getDiaChi(), x.getMaCT(), x.getQuan(), x.getPhuong(),
 					x.getDienThoai(), x.getEmail() });
 		}
 	}
 
+	// Add khách hàng
 	public void addKhachHang() {
 
 		String maKH = txtMaKH.getText();
@@ -104,28 +127,107 @@ public class KhachHangUi extends JFrame {
 		String email = txtEmail.getText();
 
 		QLTD.add(new KhachHang(maKH, tenKH, diaChi, maCT, phuong, quan, dienThoai, email));
+
 		dm.addRow(new String[] { txtMaKH.getText(), txtTenKH.getText(), txtDiaChi.getText(), txtMaCT.getText(),
 				cboQuan.getSelectedItem().toString(), cboPhuong.getSelectedItem().toString(), txtDienThoai.getText(),
 				txtEmail.getText() });
 	}
 
-	// SỰ KIỆN CRUD
-	ActionListener btnDanhSachClick = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			// Hiển thị danh sách
+	// Xoa khách hàng
+	public void deleteKhachHang(KhachHang kh) {
 
-			hienThiDS();
+		String maKH = txtMaKH.getText();
+		String tenKH = txtTenKH.getText();
+		String diaChi = txtDiaChi.getText();
+		String maCT = txtMaCT.getText();
+		String phuong = cboQuan.getSelectedItem().toString();
+		String quan = cboPhuong.getSelectedItem().toString();
+		String dienThoai = txtDienThoai.getText();
+		String email = txtEmail.getText();
+
+		int[] rows = tbl.getSelectedRows();
+
+		for (int i = 0; i < rows.length; i++) {
+			dm.removeRow(rows[i] - i);
+
+		}
+		QuanLyTienDienDAO.delete(new KhachHang(maKH, tenKH, diaChi, maCT, phuong, quan, dienThoai, email));
+	}
+
+	public void editKhachHang() {
+
+		String maKH = txtMaKH.getText();
+		String tenKH = txtTenKH.getText();
+		String diaChi = txtDiaChi.getText();
+		String maCT = txtMaCT.getText();
+		String phuong = cboQuan.getSelectedItem().toString();
+		String quan = cboPhuong.getSelectedItem().toString();
+		String dienThoai = txtDienThoai.getText();
+		String email = txtEmail.getText();
+
+		QuanLyTienDienDAO.edit(new KhachHang(maKH, tenKH, diaChi, maCT, phuong, quan, dienThoai, email));
+
+		int row = tbl.getSelectedRow();
+		tbl.setValueAt(maKH, row, 0);
+		tbl.setValueAt(tenKH, row, 1);
+		tbl.setValueAt(diaChi, row, 2);
+		tbl.setValueAt(maCT, row, 3);
+		tbl.setValueAt(quan, row, 4);
+		tbl.setValueAt(phuong, row, 5);
+		tbl.setValueAt(dienThoai, row, 6);
+		tbl.setValueAt(email, row, 7);
+
+	}
+
+	MouseListener tblUserClick = new MouseListener() {
+
+		public void mouseClicked(MouseEvent e) {
+
+			int row = tbl.getSelectedRow();
+
+			String makh = (String) tbl.getValueAt(row, 0);
+			txtMaKH.setText(makh);
+
+			String ten = (String) tbl.getValueAt(row, 1);
+			txtTenKH.setText(ten);
+
+			String diachi = (String) tbl.getValueAt(row, 2);
+			txtDiaChi.setText(diachi);
+
+			String mct = (String) tbl.getValueAt(row, 3);
+			txtMaCT.setText(mct);
+
+			String dt = (String) tbl.getValueAt(row, 6);
+			txtDienThoai.setText(dt);
+
+			String email = (String) tbl.getValueAt(row, 7);
+			txtEmail.setText(email);
+
 		}
 
-	};
+		@Override
+		public void mouseEntered(MouseEvent arg0) {
+			// TODO Auto-generated method stub
 
-	ActionListener btnAddClick = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			// Hiển thị danh sách
-
-			addKhachHang();
 		}
 
+		@Override
+		public void mouseExited(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mousePressed(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+
+		}
 	};
 
 	public void addControls() throws SQLException {
@@ -405,6 +507,11 @@ public class KhachHangUi extends JFrame {
 		con.add(pnBorder);
 
 		addComboBoxCounty(QuanLyTienDienDAO.getQuan(), cboQuan);
+
+		/*
+		 * if (conn != null) { System.out.println("ABC"); } else {
+		 * System.out.println("dmm"); }
+		 */
 	}
 
 	ActionListener eventQuan1 = new ActionListener() {
@@ -429,11 +536,120 @@ public class KhachHangUi extends JFrame {
 
 	private void addComboBoxWard(ResultSet wardList, JComboBox<Object> cb) throws SQLException {
 		while (wardList.next()) {
-			cboPhuong.addItem("Chọn phường");
+			// cboPhuong.addItem("Chọn phường");
 			cb.addItem(wardList.getObject("tenphuong"));
 		}
 	}
 
+	// SỰ KIỆN CRUD
+	ActionListener btnDanhSachClick = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			// Hiển thị danh sách
+
+			hienThiDS();
+		}
+
+	};
+	
+	//search 
+	
+
+	// add customer
+	ActionListener btnAddClick = new ActionListener() {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+
+			try {
+				if (txtTenKH.getText().equals("") || txtMaKH.getText().equals("") || txtMaCT.getText().equals("")
+						|| txtDiaChi.getText().equals("") || cboQuan.getSelectedIndex() < 0
+						|| cboPhuong.getSelectedIndex() < 0 || txtDienThoai.getText().equals("")
+						|| txtEmail.getText().equals("")) {
+
+					JOptionPane.showMessageDialog(null, "Hãy nhập đầy đủ thông tin");
+
+				} else if (!checkPhoneNumber(txtDienThoai.getText())) {
+					JOptionPane.showMessageDialog(null, "Số điện thoại không đúng định dạng, vui lòng nhập lại");
+				} else if (!checkEmail(txtEmail.getText())) {
+					JOptionPane.showMessageDialog(null, "Email không đúng định dạng, vui lòng nhập lại");
+				} else if (checkMaCT(txtMaCT.getText())) {
+					JOptionPane.showMessageDialog(null, "Mã công tơ đã bị trùng, vui lòng nhập lại");
+				} else {
+					addKhachHang();
+
+				}
+				//
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+	};
+
+	// edit customer
+	ActionListener btnEditClick = new ActionListener() {
+
+		public void actionPerformed(ActionEvent e) {
+
+			try {
+
+				if (txtTenKH.getText().equals("") || txtMaKH.getText().equals("") || txtMaCT.getText().equals("")
+						|| txtDiaChi.getText().equals("") || cboQuan.getSelectedIndex() < 0
+						|| cboPhuong.getSelectedIndex() < 0 || txtDienThoai.getText().equals("")
+						|| txtEmail.getText().equals("")) {
+
+					JOptionPane.showMessageDialog(null, "Hãy chọn khách hàng bạn muốn sửa");
+
+				} else if (!checkPhoneNumber(txtDienThoai.getText())) {
+					JOptionPane.showMessageDialog(null, "Số điện thoại không đúng định dạng, vui lòng nhập lại");
+				} else if (!checkEmail(txtEmail.getText())) {
+					JOptionPane.showMessageDialog(null, "Email không đúng định dạng, vui lòng nhập lại");
+				} else if (checkMaCT(txtMaCT.getText())) {
+					JOptionPane.showMessageDialog(null, "Mã công tơ đã bị trùng, vui lòng nhập lại");
+				} else {
+
+					int ret = JOptionPane.showConfirmDialog(null, "Bạn muốn sửa ko ?", "Sữa",
+							JOptionPane.YES_NO_OPTION);
+
+					if (ret == JOptionPane.YES_OPTION) {
+						editKhachHang();
+						JOptionPane.showMessageDialog(null, "Update thành công !");
+					} else {
+						JOptionPane.showMessageDialog(null, "Update thất bại !");
+					}
+
+				}
+				//
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+		}
+
+	};
+
+	// delete customer
+	ActionListener btnDeleteClick = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			if (tbl.getSelectedRow() == -1) {
+				JOptionPane.showMessageDialog(null, "Hãy chọn khách hàng bạn muốn xóa");
+			} else {
+
+				int ret = JOptionPane.showConfirmDialog(null, "Bạn muốn xóa ko ?", "Xóa", JOptionPane.YES_NO_OPTION);
+				if (ret == JOptionPane.YES_OPTION) {
+					deleteKhachHang(null);
+					JOptionPane.showMessageDialog(null, "Delete thành công !");
+				} else {
+					JOptionPane.showMessageDialog(null, "Delete thất bại !");
+				}
+			}
+		}
+
+	};
+
+	// SetVisible Khách Hàng
 	ActionListener btnKhachHangClick = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			myBienLai.setVisible(false);
@@ -496,6 +712,26 @@ public class KhachHangUi extends JFrame {
 
 	};
 
+	public static boolean checkMaCT(String maCT) throws SQLException {
+		ResultSet maCTKH = QuanLyTienDienDAO.getMaCT();
+		while (maCTKH.next()) {
+			if (maCT.equals(maCTKH.getString("mact"))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean checkEmail(String email) {
+		String ktEmail = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+		return email.matches(ktEmail);
+	}
+
+	public static boolean checkPhoneNumber(String phoneNumber) {
+		String ktPhone = "(\\+84|0)\\d{9,10}";
+		return phoneNumber.matches(ktPhone);
+	}
+
 	public KhachHangUi(String title) throws SQLException {
 		super(title);
 		connectControls();
@@ -510,8 +746,11 @@ public class KhachHangUi extends JFrame {
 		bcdskh.addActionListener(btnBCDSKHClick);
 		bcthtt.addActionListener(btnBCTHTTClick);
 		btnThem.addActionListener(btnAddClick);
+		btnSua.addActionListener(btnEditClick);
+		btnXoa.addActionListener(btnDeleteClick);
 		btnDanhSach.addActionListener(btnDanhSachClick);
 		cboQuan.addActionListener(eventQuan1);
+		tbl.addMouseListener(tblUserClick);
 
 	}
 

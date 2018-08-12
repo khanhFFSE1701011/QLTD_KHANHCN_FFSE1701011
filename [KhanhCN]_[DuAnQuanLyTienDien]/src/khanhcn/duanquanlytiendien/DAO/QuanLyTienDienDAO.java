@@ -12,7 +12,6 @@ import javax.swing.JOptionPane;
 import org.gjt.mm.mysql.Driver;
 
 import com.mysql.jdbc.Statement;
-
 import khanhcn.duanquanlytiendien.entity.KhachHang;
 
 public class QuanLyTienDienDAO {
@@ -27,8 +26,9 @@ public class QuanLyTienDienDAO {
 		this.conn = conn;
 	}
 
-	public void getConnect(String strServer, String strDatabase, String strUser, String strPwd) {
-		String strConnect = "jdbc:mysql://" + strServer + "/" + strDatabase;
+	public com.mysql.jdbc.Connection getConnect(String strServer, String strDatabase, String strUser, String strPwd) {
+		String strConnect = "jdbc:mysql://" + strServer + "/" + strDatabase
+				+ "?useUnicode=true&characterEncoding=utf-8";
 		Properties pro = new Properties();
 		pro.put("user", strUser);
 		pro.put("password", strPwd);
@@ -38,8 +38,9 @@ public class QuanLyTienDienDAO {
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 		}
+		return (com.mysql.jdbc.Connection) conn;
 	}
-	
+
 	public static ResultSet getQuan() {
 		try {
 			String sql = "select tenquan from Quan";
@@ -120,4 +121,69 @@ public class QuanLyTienDienDAO {
 			ex.printStackTrace();
 		}
 	}
+
+	// Xóa khách hàng
+	public static boolean delete(KhachHang kh) {
+		try {
+			String sql = "delete from khanhhang where makh=?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, kh.getMaKH());
+
+			int x = statement.executeUpdate();
+			if (x > 0) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return false;
+		}
+	}
+
+	// Edit khách hàng
+	public static boolean edit(KhachHang kh) {
+
+		try {
+			String sql = "update khanhhang set tenkh=?, diachi=?, mact=?, phuong=?, quan=?, dienthoai=?, email=? WHERE makh=?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+
+			statement.setString(1, kh.getHoTen());
+			statement.setString(2, kh.getDiaChi());
+			statement.setString(3, kh.getMaCT());
+			statement.setString(4, kh.getQuan());
+			statement.setString(5, kh.getPhuong());
+			statement.setString(6, kh.getDienThoai());
+			statement.setString(7, kh.getEmail());
+			statement.setString(8, kh.getMaKH());
+
+			int x = statement.executeUpdate();
+
+			if (x > 0) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return false;
+		}
+
+	}
+
+	public static ResultSet getMaCT() {
+		try {
+			String sql = "select mact from khanhhang";
+			PreparedStatement statement = (PreparedStatement) conn.prepareStatement(sql);
+
+			ResultSet result = statement.executeQuery();
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	
+
 }
