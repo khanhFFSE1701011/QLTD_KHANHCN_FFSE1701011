@@ -9,12 +9,13 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -30,23 +31,23 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-
-
 import com.mysql.jdbc.Connection;
 
 import khanhcn.duanquanlytiendien.DAO.QuanLyTienDienDAO;
 import khanhcn.duanquanlytiendien.entity.KhachHang;
+import khanhcn.duanquanlytiendien.entity.QuanPhuong;
 
 public class KhachHangUi extends JFrame {
 
 	static QuanLyTienDienDAO QLTD = new QuanLyTienDienDAO();
-	static Connection conn = QLTD.getConnect("localhost", "khanhcn_ffse1701011", "khanhcn", "123456");
+	ArrayList<QuanPhuong> dSPhuong = new ArrayList<QuanPhuong>();
 	ArrayList<KhachHang> dsKH = new ArrayList<KhachHang>();
+	static Connection conn = QLTD.getConnect("localhost", "khanhcn_ffse1701011", "khanhcn", "123456");
 
 	DefaultTableModel dm;
 	JTable tbl;
 	JComboBox<Object> cbo;
-	private JComboBox<Object> cboQuan, cboPhuong;
+	private JComboBox<QuanPhuong> cboQuan, cboPhuong;
 	JScrollPane sc;
 	JTextField txtMaKH;
 	JTextField txtTenKH;
@@ -56,20 +57,11 @@ public class KhachHangUi extends JFrame {
 	JTextField txtQuan;
 	JTextField txtDienThoai;
 	JTextField txtEmail;
-	
-	//txt Biên Lai 
-	JTextField tfMaKH;
-	JTextField tfTenKH;
-	JTextField tfDiaChi;
-	JTextField tfPhuong;
-	JTextField tfQuan;
-	JTextField tfDienThoai;
-	JTextField tfEmail;
 
 	JButton btnThem = new JButton("      Thêm");
 	JButton btnSua = new JButton("   Sửa");
 	JButton btnXoa = new JButton("   Xóa");
-	JButton btnDanhSach = new JButton("            Danh sách");
+	JButton btnReset = new JButton("        Reset");
 	JButton btnThoat = new JButton("    Thoát");
 	JButton khachHang = new JButton("         KHÁCH HÀNG");
 	JButton bienLai = new JButton("  BIÊN LAI");
@@ -91,27 +83,28 @@ public class KhachHangUi extends JFrame {
 
 		QLTD.getConnect("localhost", "khanhcn_ffse1701011", "khanhcn", "123456");
 
-		if (QLTD != null) {
-
-			JOptionPane.showMessageDialog(null, "Kết nối MYSQL thành công! ");
-		} else {
-
-			JOptionPane.showMessageDialog(null, "Kết nối MYSQL thất bại ! ");
-		}
-
+		/*
+		 * if (QLTD != null) {
+		 * 
+		 * JOptionPane.showMessageDialog(null, "Kết nối MYSQL thành công! "); } else {
+		 * 
+		 * JOptionPane.showMessageDialog(null, "Kết nối MYSQL thất bại ! "); }
+		 */
 	}
-
-	
 
 	public void hienThiDS() {
 
 		dsKH = QLTD.getDSKhachHang();
-		dm.setRowCount(0);
-		;
-		for (KhachHang x : dsKH) {
-			dm.addRow(new String[] { x.getMaKH(), x.getHoTen(), x.getDiaChi(), x.getMaCT(), x.getQuan(), x.getPhuong(),
-					x.getDienThoai(), x.getEmail() });
+		dSPhuong = QLTD.getQuanKH();
+		// dSPhuong = tienDienDao.getPhuongKH();
+		for (int i = 0; i < dsKH.size(); i++) {
+			dm.addRow(new String[] { dsKH.get(i).getMaKH(), dsKH.get(i).getHoTen(), dsKH.get(i).getDiaChi(),
+					dsKH.get(i).getMaCT(), QuanLyTienDienDAO.getNamePhuong(dsKH.get(i).getPhuong()),
+					QuanLyTienDienDAO.getNameQuan(dsKH.get(i).getQuan()), dsKH.get(i).getEmail(),
+					dsKH.get(i).getDienThoai() });
+
 		}
+
 	}
 
 	// Add khách hàng
@@ -121,16 +114,19 @@ public class KhachHangUi extends JFrame {
 		String tenKH = txtTenKH.getText();
 		String diaChi = txtDiaChi.getText();
 		String maCT = txtMaCT.getText();
-		String phuong = cboQuan.getSelectedItem().toString();
-		String quan = cboPhuong.getSelectedItem().toString();
+
+		String quan = cboQuan.getSelectedItem().toString();
+		int idquan = ((QuanPhuong) cboQuan.getSelectedItem()).getId();
+		int idphuong = ((QuanPhuong) cboPhuong.getSelectedItem()).getId();
+
+		String phuong = cboPhuong.getSelectedItem().toString();
+
 		String dienThoai = txtDienThoai.getText();
 		String email = txtEmail.getText();
 
-		QLTD.add(new KhachHang(maKH, tenKH, diaChi, maCT, phuong, quan, dienThoai, email));
+		QLTD.add(new KhachHang(maKH, tenKH, diaChi, maCT, idphuong, idquan, dienThoai, email));
 
-		dm.addRow(new String[] { txtMaKH.getText(), txtTenKH.getText(), txtDiaChi.getText(), txtMaCT.getText(),
-				cboQuan.getSelectedItem().toString(), cboPhuong.getSelectedItem().toString(), txtDienThoai.getText(),
-				txtEmail.getText() });
+		dm.addRow(new String[] { maKH, tenKH, diaChi, maCT, phuong, quan, dienThoai, email });
 	}
 
 	// Xoa khách hàng
@@ -140,8 +136,13 @@ public class KhachHangUi extends JFrame {
 		String tenKH = txtTenKH.getText();
 		String diaChi = txtDiaChi.getText();
 		String maCT = txtMaCT.getText();
-		String phuong = cboQuan.getSelectedItem().toString();
-		String quan = cboPhuong.getSelectedItem().toString();
+
+		String quan = cboQuan.getSelectedItem().toString();
+		int idquan = ((QuanPhuong) cboQuan.getSelectedItem()).getId();
+		int idphuong = ((QuanPhuong) cboPhuong.getSelectedItem()).getId();
+
+		String phuong = cboPhuong.getSelectedItem().toString();
+
 		String dienThoai = txtDienThoai.getText();
 		String email = txtEmail.getText();
 
@@ -151,7 +152,17 @@ public class KhachHangUi extends JFrame {
 			dm.removeRow(rows[i] - i);
 
 		}
-		QuanLyTienDienDAO.delete(new KhachHang(maKH, tenKH, diaChi, maCT, phuong, quan, dienThoai, email));
+		QuanLyTienDienDAO.delete(new KhachHang(maKH, tenKH, diaChi, maCT, idquan, idphuong, dienThoai, email));
+	}
+
+	public void reset() {
+		txtMaKH.setText("");
+		txtTenKH.setText("");
+		txtDiaChi.setText("");
+		txtMaCT.setText("");
+		cboQuan.setSelectedIndex(0);
+		txtDienThoai.setText("");
+		txtEmail.setText("");
 	}
 
 	public void editKhachHang() {
@@ -160,12 +171,17 @@ public class KhachHangUi extends JFrame {
 		String tenKH = txtTenKH.getText();
 		String diaChi = txtDiaChi.getText();
 		String maCT = txtMaCT.getText();
-		String phuong = cboQuan.getSelectedItem().toString();
-		String quan = cboPhuong.getSelectedItem().toString();
+
+		String quan = cboQuan.getSelectedItem().toString();
+		int idquan = ((QuanPhuong) cboQuan.getSelectedItem()).getId();
+		int idphuong = ((QuanPhuong) cboPhuong.getSelectedItem()).getId();
+
+		String phuong = cboPhuong.getSelectedItem().toString();
+
 		String dienThoai = txtDienThoai.getText();
 		String email = txtEmail.getText();
 
-		QuanLyTienDienDAO.edit(new KhachHang(maKH, tenKH, diaChi, maCT, phuong, quan, dienThoai, email));
+		QuanLyTienDienDAO.edit(new KhachHang(maKH, tenKH, diaChi, maCT, idphuong, idquan, dienThoai, email));
 
 		int row = tbl.getSelectedRow();
 		tbl.setValueAt(maKH, row, 0);
@@ -195,7 +211,13 @@ public class KhachHangUi extends JFrame {
 			txtDiaChi.setText(diachi);
 
 			String mct = (String) tbl.getValueAt(row, 3);
-			txtMaCT.setText(mct);
+			cboPhuong.getSelectedIndex(mct);
+
+			String quan = (String) tbl.getValueAt(row, 4);
+			cboQuan.getSelectedItem(quan);
+
+			String phuong = (String) tbl.getValueAt(row, 5);
+			txtMaCT.setText(phuong);
 
 			String dt = (String) tbl.getValueAt(row, 6);
 			txtDienThoai.setText(dt);
@@ -370,9 +392,15 @@ public class KhachHangUi extends JFrame {
 		// Tạo JComboBox chứ các Quận
 		JPanel pnQuan = new JPanel();
 		JLabel lblQuan = new JLabel("Chọn Quận:        ");
-		cboQuan = new JComboBox<Object>();
-		cboQuan.addItem("Chọn quận");
+		cboQuan = new JComboBox();
+		ArrayList<QuanPhuong> tenQuan = new ArrayList<QuanPhuong>();
+		tenQuan = QLTD.getQuanKH();
+		for (QuanPhuong x : tenQuan) {
+			cboQuan.addItem(x);
+		}
+		cboQuan.addItemListener(chonQuan);
 		cboQuan.setPreferredSize(new Dimension(158, 28));
+
 		pnQuan.add(lblQuan);
 		pnQuan.add(cboQuan);
 		pnRight.add(pnQuan);
@@ -380,8 +408,8 @@ public class KhachHangUi extends JFrame {
 		// Tạo JComboBox chứ các Phường
 		JPanel pnPhuong = new JPanel();
 		JLabel lblPhuong = new JLabel("Chọn Phường:   ");
-		cboPhuong = new JComboBox<Object>();
-		cboPhuong.addItem("Chọn phường");
+		cboPhuong = new JComboBox();
+		loadDataPhuong();
 		cboPhuong.setPreferredSize(new Dimension(158, 28));
 		pnPhuong.add(lblPhuong);
 		pnPhuong.add(cboPhuong);
@@ -438,14 +466,14 @@ public class KhachHangUi extends JFrame {
 		btnXoa.add(delete);
 		pnCenter.add(btnXoa);
 
-		// JButton btnDanhSach = new JButton(" Danh sách");
-		btnDanhSach.setPreferredSize(new Dimension(110, 50));
-		btnDanhSach.setMargin(new Insets(0, 0, 0, 0));
+		// JButton btnDanhSach = new JButton("Reset");
+		btnReset.setPreferredSize(new Dimension(110, 50));
+		btnReset.setMargin(new Insets(0, 15, 0, 0));
 		ImageIcon iconDSKH = new ImageIcon(
-				new ImageIcon("img/dskh.jpg").getImage().getScaledInstance(40, 30, Image.SCALE_SMOOTH));
-		JLabel dskhachhang = new JLabel(iconDSKH);
-		btnDanhSach.add(dskhachhang);
-		pnCenter.add(btnDanhSach);
+				new ImageIcon("img/reset.jpg").getImage().getScaledInstance(37, 37, Image.SCALE_SMOOTH));
+		JLabel Reset = new JLabel(iconDSKH);
+		btnReset.add(Reset);
+		pnCenter.add(btnReset);
 
 		// JButton btnThoat = new JButton(" Thoát");
 		btnThoat.setPreferredSize(new Dimension(110, 50));
@@ -462,7 +490,7 @@ public class KhachHangUi extends JFrame {
 		pnActions.add(btnThem);
 		pnActions.add(btnSua);
 		pnActions.add(btnXoa);
-		pnActions.add(btnDanhSach);
+		pnActions.add(btnReset);
 		pnActions.add(btnThoat);
 		pnCenter.add(pnActions);
 		pnBorder.add(pnCenter, BorderLayout.CENTER);
@@ -506,53 +534,48 @@ public class KhachHangUi extends JFrame {
 		myBCTHTT.setVisible(false);
 		con.add(pnBorder);
 
-		addComboBoxCounty(QuanLyTienDienDAO.getQuan(), cboQuan);
-
 		/*
 		 * if (conn != null) { System.out.println("ABC"); } else {
 		 * System.out.println("dmm"); }
 		 */
 	}
 
-	ActionListener eventQuan1 = new ActionListener() {
+	ItemListener chonQuan = new ItemListener() {
 
 		@Override
-		public void actionPerformed(ActionEvent e) {
-			cboPhuong.removeAllItems();
-			int idquan = cboQuan.getSelectedIndex();
-			try {
-				addComboBoxWard(QuanLyTienDienDAO.getPhuong(idquan), cboPhuong);
-			} catch (SQLException e1) {
-				e1.printStackTrace();
+		public void itemStateChanged(ItemEvent e) {
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				loadDataPhuong();
 			}
 		}
 	};
 
-	private void addComboBoxCounty(ResultSet county, JComboBox<Object> cb) throws SQLException {
-		while (county.next()) {
-			cb.addItem(county.getObject("tenquan"));
-		}
-	}
+	public void loadDataPhuong() {
+		dSPhuong.clear();
+		int itemPhuong = cboPhuong.getItemCount();
+		for (int i = 0; i < itemPhuong; i++) {
+			cboPhuong.removeItemAt(0);
 
-	private void addComboBoxWard(ResultSet wardList, JComboBox<Object> cb) throws SQLException {
-		while (wardList.next()) {
-			// cboPhuong.addItem("Chọn phường");
-			cb.addItem(wardList.getObject("tenphuong"));
+		}
+		QuanPhuong itemID = (QuanPhuong) cboQuan.getSelectedItem();
+		int iD = itemID.getId();
+		dSPhuong = QLTD.getPhuongKH(iD);
+		for (QuanPhuong o : dSPhuong) {
+			cboPhuong.addItem(o);
 		}
 	}
 
 	// SỰ KIỆN CRUD
-	ActionListener btnDanhSachClick = new ActionListener() {
+	ActionListener btnResetClick = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			// Hiển thị danh sách
 
-			hienThiDS();
+			reset();
 		}
 
 	};
-	
-	//search 
-	
+
+	// search
 
 	// add customer
 	ActionListener btnAddClick = new ActionListener() {
@@ -577,6 +600,7 @@ public class KhachHangUi extends JFrame {
 					JOptionPane.showMessageDialog(null, "Mã công tơ đã bị trùng, vui lòng nhập lại");
 				} else {
 					addKhachHang();
+					reset();
 
 				}
 				//
@@ -614,6 +638,7 @@ public class KhachHangUi extends JFrame {
 
 					if (ret == JOptionPane.YES_OPTION) {
 						editKhachHang();
+						reset();
 						JOptionPane.showMessageDialog(null, "Update thành công !");
 					} else {
 						JOptionPane.showMessageDialog(null, "Update thất bại !");
@@ -640,6 +665,7 @@ public class KhachHangUi extends JFrame {
 				int ret = JOptionPane.showConfirmDialog(null, "Bạn muốn xóa ko ?", "Xóa", JOptionPane.YES_NO_OPTION);
 				if (ret == JOptionPane.YES_OPTION) {
 					deleteKhachHang(null);
+					reset();
 					JOptionPane.showMessageDialog(null, "Delete thành công !");
 				} else {
 					JOptionPane.showMessageDialog(null, "Delete thất bại !");
@@ -737,6 +763,7 @@ public class KhachHangUi extends JFrame {
 		connectControls();
 		addControls();
 		addEvents();
+		hienThiDS();
 	}
 
 	public void addEvents() {
@@ -748,8 +775,8 @@ public class KhachHangUi extends JFrame {
 		btnThem.addActionListener(btnAddClick);
 		btnSua.addActionListener(btnEditClick);
 		btnXoa.addActionListener(btnDeleteClick);
-		btnDanhSach.addActionListener(btnDanhSachClick);
-		cboQuan.addActionListener(eventQuan1);
+		btnReset.addActionListener(btnResetClick);
+		// cboQuan.addActionListener(eventQuan1);
 		tbl.addMouseListener(tblUserClick);
 
 	}

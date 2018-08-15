@@ -11,8 +11,8 @@ import javax.swing.JOptionPane;
 
 import org.gjt.mm.mysql.Driver;
 
-import com.mysql.jdbc.Statement;
 import khanhcn.duanquanlytiendien.entity.KhachHang;
+import khanhcn.duanquanlytiendien.entity.QuanPhuong;
 
 public class QuanLyTienDienDAO {
 
@@ -41,29 +41,77 @@ public class QuanLyTienDienDAO {
 		return (com.mysql.jdbc.Connection) conn;
 	}
 
-	public static ResultSet getQuan() {
+	public ArrayList<QuanPhuong> getQuanKH() {
+		ArrayList<QuanPhuong> listPhuong = new ArrayList<QuanPhuong>();
 		try {
-			String sql = "select tenquan from Quan";
-			Statement statement = (Statement) conn.createStatement();
-			ResultSet result = statement.executeQuery(sql);
-			return result;
+			String sql = "select id,tenquan from quan WHERE id>=1 AND id<=7";
+			PreparedStatement stm = (PreparedStatement) conn.prepareStatement(sql);
+			ResultSet result = stm.executeQuery();
+
+			while (result.next()) {
+				QuanPhuong quan = new QuanPhuong();
+				quan.setId(result.getInt(1));
+				quan.setTen(result.getString(2));
+				listPhuong.add(quan);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
 		}
+		return listPhuong;
 	}
 
-	public static ResultSet getPhuong(int idquan) {
+	public ArrayList<QuanPhuong> getPhuongKH(int idQuan) {
+		ArrayList<QuanPhuong> listPhuong = new ArrayList<>();
 		try {
-			String sql = "select tenphuong from Phuong where idquan = ?";
+			String sql = "select tenphuong, idphuong from phuong where idquan = '" + idQuan + "'";
 			PreparedStatement stm = (PreparedStatement) conn.prepareStatement(sql);
-			stm.setInt(1, idquan);
 			ResultSet result = stm.executeQuery();
-			return result;
+			while (result.next()) {
+				QuanPhuong phuong = new QuanPhuong();
+				phuong.setTen(result.getString(1));
+				phuong.setId(result.getInt(2));
+				listPhuong.add(phuong);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
+
 		}
+		return listPhuong;
+	}
+
+	public static String getNameQuan(int id) {
+		String Quan = "";
+		try {
+			String sql = "SELECT * from quan WHERE id = '" + id + "'";
+			PreparedStatement stm = (PreparedStatement) conn.prepareStatement(sql);
+			ResultSet rs = stm.executeQuery(sql);
+			while (rs.next()) {
+				Quan = rs.getString("tenquan");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return Quan;
+	}
+
+	public static String getNamePhuong(int id) {
+		String Quan = "";
+		try {
+			String sql = "SELECT * from phuong WHERE idphuong = '" + id + "'";
+			PreparedStatement stm = (PreparedStatement) conn.prepareStatement(sql);
+			ResultSet rs = stm.executeQuery(sql);
+			while (rs.next()) {
+				Quan = rs.getString("tenphuong");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return Quan;
+	}
+
+	public ArrayList<QuanPhuong> getPhuongKH() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public ArrayList<KhachHang> getDSKhachHang() {
@@ -71,6 +119,15 @@ public class QuanLyTienDienDAO {
 		ArrayList<KhachHang> dsKH = new ArrayList<KhachHang>();
 
 		try {
+			// String queryString = "SELECT khanhhang.makh, khanhhang.tenkh,
+			// khanhhang.diachi, khanhhang.mact, phuong.tenphuong, quan.tenquan,
+			// khanhhang.dienthoai,khanhhang.email\r\n" +
+			// "FROM khanhhang\r\n" +
+			// "INNER JOIN phuong\r\n" +
+			// "ON (khanhhang.phuong = phuong.idquan)\r\n" +
+			// "INNER JOIN quan\r\n" +
+			// "ON (khanhhang.quan = quan.id)\r\n" +
+			// "";
 			String queryString = "SELECT * FROM khanhhang";
 			PreparedStatement statement = conn.prepareStatement(queryString);
 
@@ -82,12 +139,12 @@ public class QuanLyTienDienDAO {
 				String tenKH = result.getString("tenkh");
 				String diaChi = result.getString("diachi");
 				String maCT = result.getString("mact");
-				String phuong = result.getString("phuong");
-				String quan = result.getString("quan");
+				int quan = result.getInt("quan");
+				int phuong = result.getInt("phuong");
 				String dienThoai = result.getString("dienthoai");
 				String email = result.getString("email");
 
-				dsKH.add(new KhachHang(maKH, tenKH, diaChi, maCT, phuong, quan, dienThoai, email));
+				dsKH.add(new KhachHang(maKH, tenKH, diaChi, maCT, quan, phuong, dienThoai, email));
 			}
 
 		} catch (Exception e) {
@@ -106,8 +163,8 @@ public class QuanLyTienDienDAO {
 			statement.setString(2, kh.getHoTen());
 			statement.setString(3, kh.getDiaChi());
 			statement.setString(4, kh.getMaCT());
-			statement.setString(5, kh.getPhuong());
-			statement.setString(6, kh.getQuan());
+			statement.setInt(5, kh.getPhuong());
+			statement.setInt(6, kh.getQuan());
 			statement.setString(7, kh.getDienThoai());
 			statement.setString(8, kh.getEmail());
 
@@ -151,8 +208,8 @@ public class QuanLyTienDienDAO {
 			statement.setString(1, kh.getHoTen());
 			statement.setString(2, kh.getDiaChi());
 			statement.setString(3, kh.getMaCT());
-			statement.setString(4, kh.getQuan());
-			statement.setString(5, kh.getPhuong());
+			statement.setInt(4, kh.getQuan());
+			statement.setInt(5, kh.getPhuong());
 			statement.setString(6, kh.getDienThoai());
 			statement.setString(7, kh.getEmail());
 			statement.setString(8, kh.getMaKH());
@@ -183,7 +240,5 @@ public class QuanLyTienDienDAO {
 			return null;
 		}
 	}
-
-	
 
 }

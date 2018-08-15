@@ -4,13 +4,13 @@ public class KhachHang {
 	private String maKH;
 	private String hoTen;
 	private String diaChi;
-	private String phuong;
-	private String quan;
+	private int phuong;
+	private int quan;
 	private String dienThoai;
 	private String email;
 	private String maCT;
 
-	public KhachHang(String maKH, String hoTen, String diaChi, String maCT, String phuong, String quan,
+	public KhachHang(String maKH, String hoTen, String diaChi, String maCT, int phuong, int quan,
 			String dienThoai, String email) {
 		super();
 		this.maKH = maKH;
@@ -47,19 +47,19 @@ public class KhachHang {
 		this.diaChi = diaChi;
 	}
 
-	public String getPhuong() {
+	public int getPhuong() {
 		return phuong;
 	}
 
-	public void setPhuong(String phuong) {
+	public void setPhuong(int phuong) {
 		this.phuong = phuong;
 	}
 
-	public String getQuan() {
+	public int getQuan() {
 		return quan;
 	}
 
-	public void setQuan(String quan) {
+	public void setQuan(int quan) {
 		this.quan = quan;
 	}
 

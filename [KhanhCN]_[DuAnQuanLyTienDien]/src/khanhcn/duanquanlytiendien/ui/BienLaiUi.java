@@ -84,19 +84,19 @@ public class BienLaiUi extends JPanel {
 
 			if (rs.next()) {
 
-				String s = rs.getString(1);
+				String s = rs.getString(2);
 
-				String s1 = rs.getString(2);
+				String s1 = rs.getString(3);
 
-				String s2 = rs.getString(3);
+				String s2 = rs.getString(4);
 
-				String s3 = rs.getString(4);
+				String s3 = rs.getString(6);
 
-				String s4 = rs.getString(5);
+				String s4 = rs.getString(7);
 
-				String s5 = rs.getString(6);
+				String s5 = rs.getString(8);
 
-				String s6 = rs.getString(7);
+				String s6 = rs.getString(9);
 
 				// Sets Records in TextFields.
 
