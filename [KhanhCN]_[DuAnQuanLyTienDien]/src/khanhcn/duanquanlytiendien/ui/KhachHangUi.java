@@ -232,7 +232,7 @@ public class KhachHangUi extends JFrame {
 			
 			btnSua.setEnabled(true);
 			btnXoa.setEnabled(true);
-			//btnThem.setEnabled(false);
+			//	btnThem.setEnabled(false);
 			
 		
 			//////////////////////////

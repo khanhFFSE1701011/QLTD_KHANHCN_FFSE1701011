@@ -8,6 +8,7 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,15 +33,36 @@ import org.gjt.mm.mysql.Driver;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.PreparedStatement;
+import com.toedter.calendar.JMonthChooser;
+import com.toedter.calendar.JYearChooser;
 
 import khanhcn.duanquanlytiendien.DAO.QuanLyTienDienDAO;
+import khanhcn.duanquanlytiendien.entity.BienLai;
+import khanhcn.duanquanlytiendien.entity.KhachHang;
 
 public class BienLaiUi extends JPanel {
+	private JButton btnThem;
+	private JButton btnSua;
+	private JButton btnXoa;
+	private JButton btnThoat;
 	static int chiSoCu;
 	static int chiSoMoi;
+
 	private DateFormat dateFormat;
 	private Date date;
+
+	private String maCT;
+	private String stringChiSoCT;
+	private String ngayNhapCT;
+	private String thangNhapCT;
+	private String namNhapCT;
+	private String ctCu;
+	private int chiSoCT;
+	private String chuKy;
+	private int tienDien;
+
 	static QuanLyTienDienDAO QLTD = new QuanLyTienDienDAO();
+	static ArrayList<BienLai> dsBL = new ArrayList<BienLai>();
 	static Connection conn = QLTD.getConnect("localhost", "khanhcn_ffse1701011", "khanhcn", "123456");
 	private JTable tbl;
 	private JPanel pnTableBL;
@@ -51,6 +73,8 @@ public class BienLaiUi extends JPanel {
 	private DefaultTableModel dm;
 	JButton btnSearch;
 	// txt Biên Lai
+	JMonthChooser jmc;
+	JYearChooser jyc;
 	JTextField tfMaKH;
 	JTextField tfTenKH;
 	JTextField tfDiaChi;
@@ -76,89 +100,12 @@ public class BienLaiUi extends JPanel {
 		}
 	}
 
-	public void search() throws SQLException {
-		if (!checkMaCT(txtCSCT.getText())) {
-
-			try {
-
-				String str = txtMaCT.getText();
-
-				PreparedStatement st = (PreparedStatement) conn.prepareStatement(
-						"SELECT khanhhang.makh, khanhhang.tenkh , khanhhang.diachi, khanhhang.dienthoai , bienlai.mact, bienlai.thang, bienlai.nam , bienlai.chisoct FROM khanhhang INNER JOIN bienlai ON khanhhang.mact = bienlai.mact WHERE bienlai.mact=?");
-				st.setString(1, str);
-				ResultSet rs = st.executeQuery();
-
-				if (rs.next()) {
-
-					String s = rs.getString(1);
-
-					String s1 = rs.getString(2);
-
-					String s2 = rs.getString(3);
-
-					String s3 = rs.getString(5);
-
-					String s4 = rs.getString(6);
-					
-					String s5 = rs.getString(7);
-
-					chiSoCu = rs.getInt(8);
-					String ctCu = String.valueOf(chiSoCu);
-
-					// Sets Records in TextFields.
-
-					tfMaKH.setText(s);
-					tfTenKH.setText(s1);
-					tfDiaChi.setText(s2);
-					tfMaCT.setText(s3);
-					tfChuKy.setText(s4 +"-"+ s5);
-					tfCTcu.setText(ctCu);
-
-				} else {
-
-					// System.out.println(2);
-					String str1 = txtMaCT.getText();
-
-					PreparedStatement st1 = (PreparedStatement) conn
-							.prepareStatement("SELECT * FROM khanhhang WHERE mact = ?");
-
-					st1.setString(1, str1);
-
-					// Excuting Query
-					ResultSet rs1 = st1.executeQuery();
-
-					if (rs1.next()) {
-
-						String s1 = rs1.getString(2);
-						String s2 = rs1.getString(3);
-						String s3 = rs1.getString(4);
-						String s4 = rs1.getString(5);
-
-						// Sets Records in TextFields.
-
-						tfMaKH.setText(s1);
-						tfTenKH.setText(s2);
-						tfDiaChi.setText(s3);
-						tfMaCT.setText(s4);
-						tfChuKy.setText("Chưa có ! ");
-						tfCTcu.setText("0");
-
-					} else {
-
-						JOptionPane.showMessageDialog(null, "Mã CT không tồn tại ! Vui lòng thử lại ");
-					}
-
-				}
-			} catch (Exception ex) {
-
-				System.out.println(ex);
-
-			}
-		}
-
+	public BienLaiUi() {
+		addControls();
+		addEvent();
 	}
 
-	public BienLaiUi() {
+	public void addControls() {
 
 		// Nạp container và add main panel
 
@@ -213,49 +160,16 @@ public class BienLaiUi extends JPanel {
 		pnChisoCT.add(txtCSCT);
 		pnLeft.add(pnChisoCT);
 
-		// Tạo JComboBox chứa các tháng
-		JPanel pnListmonth = new JPanel();
-		JLabel lblmonth = new JLabel("Chọn tháng:  ");
+		JLabel lblMonth = new JLabel("Chu kỳ        :");
 
-		cbo = new JComboBox<String>();
-		cbo.setPreferredSize(new Dimension(90, 28));
-		cbo.addItem("Chọn tháng");
-		cbo.addItem("1");
-		cbo.addItem("2");
-		cbo.addItem("3");
-		cbo.addItem("4");
-		cbo.addItem("5");
-		cbo.addItem("6");
-		cbo.addItem("7");
-		cbo.addItem("8");
-		cbo.addItem("9");
-		cbo.addItem("10");
-		cbo.addItem("11");
-		cbo.addItem("12");
-
-		pnListmonth.add(lblmonth);
-		pnListmonth.add(cbo);
-		pnLeft.add(pnListmonth);
-
-		// Tạo JComboBox chứa các năm
-		JPanel pnListyear = new JPanel();
-		JLabel lblyear = new JLabel("Chọn năm:    ");
-
-		cbo = new JComboBox<String>();
-		cbo.setPreferredSize(new Dimension(90, 28));
-		cbo.addItem("Chọn năm");
-
-		cbo.addItem("2017");
-
-		cbo.addItem("2018");
-
-		cbo.addItem("2019");
-
-		cbo.addItem("2020");
-
-		pnListyear.add(lblyear);
-		pnListyear.add(cbo);
-		pnLeft.add(pnListyear);
+		JPanel pnChuKyCLD = new JPanel();
+		pnChuKyCLD.setPreferredSize(new Dimension(158, 28));
+		jmc = new JMonthChooser();
+		jyc = new JYearChooser();
+		pnChuKyCLD.add(lblMonth);
+		pnChuKyCLD.add(jmc);
+		pnChuKyCLD.add(jyc);
+		pnLeft.add(pnChuKyCLD);
 
 		JPanel pnRight = new JPanel();
 		pnRight.setLayout(new BoxLayout(pnRight, BoxLayout.Y_AXIS));
@@ -325,7 +239,7 @@ public class BienLaiUi extends JPanel {
 		 * btnNhapBL.add(nhap);
 		 */
 
-		JButton btnThem = new JButton("      Thêm");
+		btnThem = new JButton("      Thêm");
 		btnThem.setPreferredSize(new Dimension(100, 50));
 		btnThem.setMargin(new Insets(0, 10, 0, 0));
 		ImageIcon iconThem = new ImageIcon(
@@ -333,7 +247,7 @@ public class BienLaiUi extends JPanel {
 		JLabel add = new JLabel(iconThem);
 		btnThem.add(add);
 
-		JButton btnSua = new JButton("   Sửa");
+		btnSua = new JButton("   Sửa");
 		btnSua.setPreferredSize(new Dimension(110, 50));
 		btnSua.setMargin(new Insets(0, 18, 0, 0));
 		ImageIcon iconEdit = new ImageIcon(
@@ -341,7 +255,7 @@ public class BienLaiUi extends JPanel {
 		JLabel edit = new JLabel(iconEdit);
 		btnSua.add(edit);
 
-		JButton btnXoa = new JButton("   Xóa");
+		btnXoa = new JButton("   Xóa");
 		btnXoa.setPreferredSize(new Dimension(110, 50));
 		btnXoa.setMargin(new Insets(0, 18, 0, 0));
 		ImageIcon iconDelete = new ImageIcon(
@@ -349,7 +263,7 @@ public class BienLaiUi extends JPanel {
 		JLabel delete = new JLabel(iconDelete);
 		btnXoa.add(delete);
 
-		JButton btnThoat = new JButton("    Thoát");
+		btnThoat = new JButton("    Thoát");
 		btnThoat.setPreferredSize(new Dimension(110, 50));
 		btnThoat.setMargin(new Insets(0, 18, 0, 0));
 		ImageIcon iconBack = new ImageIcon(
@@ -437,9 +351,161 @@ public class BienLaiUi extends JPanel {
 		pnMaCT1.setVisible(false);
 
 	}
-	
-	//THÊM BIÊN LAI 
-	
+
+	// NHẬP BL
+	public void nhap() {
+		maCT = txtMaCT.getText();
+
+		stringChiSoCT = txtCSCT.getText();
+
+		chiSoMoi = Integer.parseInt(stringChiSoCT);
+
+		thangNhapCT = txtNgayNhap.getText();
+
+		DateFormat MM = new SimpleDateFormat("MM");
+
+		thangNhapCT = MM.format(date);
+
+		DateFormat yyyy = new SimpleDateFormat("yyyy");
+
+		namNhapCT = yyyy.format(date);
+
+		chiSoCu = Integer.parseInt(ctCu);
+
+		chiSoCT = chiSoMoi - chiSoCu;
+
+	}
+
+	// KIỂM TRA KHÁCH KHÀNG
+	public void search() throws SQLException {
+		if (!checkMaCT(txtCSCT.getText())) {
+
+			try {
+
+				String str = txtMaCT.getText();
+
+				PreparedStatement st = (PreparedStatement) conn.prepareStatement(
+						"SELECT khanhhang.makh, khanhhang.tenkh , khanhhang.diachi, khanhhang.dienthoai , bienlai.mact, bienlai.thang, bienlai.nam , bienlai.chisoct FROM khanhhang INNER JOIN bienlai ON khanhhang.mact = bienlai.mact WHERE bienlai.mact=?");
+				st.setString(1, str);
+				ResultSet rs = st.executeQuery();
+
+				if (rs.next()) {
+
+					String s = rs.getString(1);
+
+					String s1 = rs.getString(2);
+
+					String s2 = rs.getString(3);
+
+					String s3 = rs.getString(5);
+
+					String s4 = rs.getString(6);
+
+					String s5 = rs.getString(7);
+
+					chiSoCu = rs.getInt(8);
+					String ctCu = String.valueOf(chiSoCu);
+
+					// Sets Records in TextFields.
+
+					tfMaKH.setText(s);
+					tfTenKH.setText(s1);
+					tfDiaChi.setText(s2);
+					tfMaCT.setText(s3);
+					tfChuKy.setText(s4 + "-" + s5);
+					tfCTcu.setText(ctCu);
+
+				} else {
+
+					// System.out.println(2);
+					String str1 = txtMaCT.getText();
+
+					PreparedStatement st1 = (PreparedStatement) conn
+							.prepareStatement("SELECT * FROM khanhhang WHERE mact = ?");
+
+					st1.setString(1, str1);
+
+					// Excuting Query
+					ResultSet rs1 = st1.executeQuery();
+
+					if (rs1.next()) {
+
+						String s1 = rs1.getString(2);
+						String s2 = rs1.getString(3);
+						String s3 = rs1.getString(4);
+						String s4 = rs1.getString(5);
+
+						// Sets Records in TextFields.
+
+						tfMaKH.setText(s1);
+						tfTenKH.setText(s2);
+						tfDiaChi.setText(s3);
+						tfMaCT.setText(s4);
+						tfChuKy.setText("Chưa có ! ");
+						tfCTcu.setText("0");
+
+					} else {
+
+						JOptionPane.showMessageDialog(null, "Mã CT không tồn tại ! Vui lòng thử lại ");
+					}
+
+				}
+			} catch (Exception ex) {
+
+				System.out.println(ex);
+
+			}
+		}
+
+	}
+
+	// THÊM BIÊN LAI
+
+	public void add() {
+		nhap();
+		int kWh0den50 = 77450;
+		int kWh50den100 = kWh0den50 + 80000;
+		int kWh100den200 = kWh50den100 + 185800;
+		int kWh200den300 = kWh100den200 + 2340000;
+		int kWh300den400 = kWh200den300 + 261500;
+
+		if (chiSoCT < 50) {
+			tienDien = chiSoCT * 1549;
+		} else if (chiSoCT > 50 && chiSoCT < 100) {
+			tienDien = kWh0den50 + (chiSoCT * 1600);
+		} else if (chiSoCT > 100 && chiSoCT < 200) {
+			tienDien = kWh50den100 + (chiSoCT * 1858);
+		} else if (chiSoCT > 200 && chiSoCT < 300) {
+			tienDien = kWh100den200 + (chiSoCT * 2340);
+		} else if (chiSoCT > 300 && chiSoCT < 400) {
+			tienDien = kWh200den300 + (chiSoCT * 2615);
+		} else if (chiSoCT > 400) {
+			tienDien = kWh300den400 + (chiSoCT * 2710);
+		} else {
+			JOptionPane.showMessageDialog(null, "Lỗi tính tiền điện !!!");
+		}
+
+		String stringTienDien = String.valueOf(tienDien);
+		nhap();
+		dm.addRow(new String[] { maCT, ngayNhapCT, chuKy, stringChiSoCT, stringTienDien });
+		QLTD.addBienLai(new BienLai(maCT, ngayNhapCT, thangNhapCT, namNhapCT, chuKy, chiSoMoi, tienDien));
+
+	}
+
+	// EDIT BIÊN LAI
+	public void editBL() {
+
+	}
+
+	// DELETE BIÊN LAI
+	public void deleteBL() {
+
+	}
+
+	// EXIT BIÊN LAI
+	public void exitBL() {
+
+	}
 
 	// CHECK MÃ CT
 	public static boolean checkMaCT(String maCT) throws SQLException {
@@ -451,5 +517,46 @@ public class BienLaiUi extends JPanel {
 		}
 		return false;
 	}
+
+	/*ActionListener actionListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == btnSearch) {
+				try {
+					search();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+			} else if (e.getSource() == btnThem) {
+				add();
+
+			} else if (e.getSource() == btnThoat) {
+				int ret = JOptionPane.showConfirmDialog(null, "Thoát chương trình?", "Thoát",
+						JOptionPane.YES_NO_OPTION);
+
+				if (ret == JOptionPane.YES_OPTION) {
+					System.exit(0);
+				}
+
+			} else if (e.getSource() == btnSua) {
+				editBL();
+			} else if (e.getSource() == btnXoa) {
+				deleteBL();
+			}
+
+		}
+	};*/
+
+	public void addEvent() {
+		btnThem.addActionListener(btnAddClick);
+	}
+	
+	ActionListener btnAddClick = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			add();
+		}
+	};
 
 }

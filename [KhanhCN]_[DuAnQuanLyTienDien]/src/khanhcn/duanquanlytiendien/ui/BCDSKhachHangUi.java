@@ -44,11 +44,11 @@ public class BCDSKhachHangUi extends JPanel {
 	JButton btnThem = new JButton("      Tìm");
 	
 	public BCDSKhachHangUi() {
-		addControl();
+		addControls();
 		addEvent();
 	}
 
-	public void  addControl() {
+	public void  addControls() {
 
 		JPanel pnMain = new JPanel();
 		pnMain.setLayout(new BoxLayout(pnMain, BoxLayout.Y_AXIS));

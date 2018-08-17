@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 
 import org.gjt.mm.mysql.Driver;
 
+import khanhcn.duanquanlytiendien.entity.BienLai;
 import khanhcn.duanquanlytiendien.entity.KhachHang;
 import khanhcn.duanquanlytiendien.entity.QuanPhuong;
 
@@ -41,6 +42,7 @@ public class QuanLyTienDienDAO {
 		return (com.mysql.jdbc.Connection) conn;
 	}
 
+	////////////////// KHÁCH HÀNG////////////////////////
 	public ArrayList<QuanPhuong> getQuanKH() {
 		ArrayList<QuanPhuong> listPhuong = new ArrayList<QuanPhuong>();
 		try {
@@ -231,8 +233,34 @@ public class QuanLyTienDienDAO {
 			return null;
 		}
 	}
-	/////////////// BCDS//////////////////
-	
+	//////////////////////// BIÊN LAI/ /////////////////////////////
+
+	public void addBienLai(BienLai bl) {
+		try {
+			String queryString = "insert into bienlai(mact,chuky,thang,nam,chisoct,ngaynhap,tongtien) values(?,?,?,?,?,?,?)";
+			PreparedStatement statement = conn.prepareStatement(queryString);
+
+			statement.setString(1, bl.getMactBL());
+			statement.setString(2, bl.getChuKyBL());
+			statement.setString(3, bl.getThangNhapBL());
+			statement.setString(4, bl.getNamNhapBL());
+			statement.setInt(5, bl.getChiSoCTMoi());
+			statement.setString(6, bl.getNgayNhapBL());
+			statement.setInt(7, bl.getTienDien());
+
+			int x = statement.executeUpdate();
+
+			if (x > 0) {
+				JOptionPane.showMessageDialog(null, "Thêm thành công !");
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
+	/////////////// BÁO CÁO DANH SÁCH KHÁCH HÀNG//////////////////
+
 	public static ResultSet getMaCTBL() {
 		try {
 			String sql = "select mact from bienlai";
@@ -251,8 +279,8 @@ public class QuanLyTienDienDAO {
 		ArrayList<KhachHang> dsBCKH = new ArrayList<KhachHang>();
 
 		try {
-			String queryString = "SELECT khanhhang.makh, khanhhang.tenkh ,khanhhang.mact, khanhhang.diachi,quan.tenquan, phuong.tenphuong, khanhhang.dienthoai ,\r\n" + 
-					"khanhhang.email FROM khanhhang INNER JOIN quan ON khanhhang.quan = quan.id JOIN phuong ON khanhhang.phuong = phuong.idphuong WHERE phuong.tenphuong LIKE ?";
+			String queryString = "SELECT khanhhang.makh, khanhhang.tenkh ,khanhhang.mact, khanhhang.diachi,quan.tenquan, phuong.tenphuong, khanhhang.dienthoai ,\r\n"
+					+ "khanhhang.email FROM khanhhang INNER JOIN quan ON khanhhang.quan = quan.id JOIN phuong ON khanhhang.phuong = phuong.idphuong WHERE phuong.tenphuong LIKE ?";
 
 			PreparedStatement statement = conn.prepareStatement(queryString);
 			statement.setString(1, "%" + maPhuong + "%");
@@ -264,11 +292,11 @@ public class QuanLyTienDienDAO {
 				String tenKH = result.getString("tenkh");
 				String diaChi = result.getString("diachi");
 				String maCT = result.getString("mact");
-				
+
 				int quan = result.getInt("tenquan");
 				String quanKH = String.valueOf(quan);
 				System.out.println(quanKH);
-				
+
 				int phuong = result.getInt("tenphuong");
 				String phuongKH = String.valueOf(phuong);
 				String dienThoai = result.getString("dienthoai");

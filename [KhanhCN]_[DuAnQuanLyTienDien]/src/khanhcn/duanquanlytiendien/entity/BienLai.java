@@ -1,64 +1,64 @@
-package khanhcn.duanquanlytiendien.entity; 
+package khanhcn.duanquanlytiendien.entity;
 
 public class BienLai {
-	private String mactKH;
-	private String ngayNhapCT;
-	private String thangNhapCT;
-	private String namNhapCT;
-	private String chuKyCT;
+	private String mactBL;
+	private String ngayNhapBL;
+	private String thangNhapBL;
+	private String namNhapBL;
+	private String chuKyBL;
 	private int chiSoCTMoi;
 	private int tienDien;
-	
-	public BienLai(String mactKH, String ngayNhapCT, String thangNhapCT, String namNhapCT, String chuKyCT,
+
+	public BienLai(String mactBL, String ngayNhapBL, String thangNhapBL, String namNhapBL, String chuKyBL,
 			int chiSoCTMoi, int tienDien) {
 		super();
-		this.mactKH = mactKH;
-		this.ngayNhapCT = ngayNhapCT;
-		this.thangNhapCT = thangNhapCT;
-		this.namNhapCT = namNhapCT;
-		this.chuKyCT = chuKyCT;
+		this.mactBL = mactBL;
+		this.ngayNhapBL = ngayNhapBL;
+		this.thangNhapBL = thangNhapBL;
+		this.namNhapBL = namNhapBL;
+		this.chuKyBL = chuKyBL;
 		this.chiSoCTMoi = chiSoCTMoi;
 		this.tienDien = tienDien;
 	}
 
-	public String getMactKH() {
-		return mactKH;
+	public String getMactBL() {
+		return mactBL;
 	}
 
-	public void setMactKH(String mactKH) {
-		this.mactKH = mactKH;
+	public void setMactBL(String mactBL) {
+		this.mactBL = mactBL;
 	}
 
-	public String getNgayNhapCT() {
-		return ngayNhapCT;
+	public String getNgayNhapBL() {
+		return ngayNhapBL;
 	}
 
-	public void setNgayNhapCT(String ngayNhapCT) {
-		this.ngayNhapCT = ngayNhapCT;
+	public void setNgayNhapBL(String ngayNhapBL) {
+		this.ngayNhapBL = ngayNhapBL;
 	}
 
-	public String getThangNhapCT() {
-		return thangNhapCT;
+	public String getThangNhapBL() {
+		return thangNhapBL;
 	}
 
-	public void setThangNhapCT(String thangNhapCT) {
-		this.thangNhapCT = thangNhapCT;
+	public void setThangNhapBL(String thangNhapBL) {
+		this.thangNhapBL = thangNhapBL;
 	}
 
-	public String getNamNhapCT() {
-		return namNhapCT;
+	public String getNamNhapBL() {
+		return namNhapBL;
 	}
 
-	public void setNamNhapCT(String namNhapCT) {
-		this.namNhapCT = namNhapCT;
+	public void setNamNhapBL(String namNhapBL) {
+		this.namNhapBL = namNhapBL;
 	}
 
-	public String getChuKyCT() {
-		return chuKyCT;
+	public String getChuKyBL() {
+		return chuKyBL;
 	}
 
-	public void setChuKyCT(String chuKyCT) {
-		this.chuKyCT = chuKyCT;
+	public void setChuKyBL(String chuKyBL) {
+		this.chuKyBL = chuKyBL;
 	}
 
 	public int getChiSoCTMoi() {
@@ -76,10 +76,5 @@ public class BienLai {
 	public void setTienDien(int tienDien) {
 		this.tienDien = tienDien;
 	}
-	
-	
-	
-	
-	
-}
 
+}
