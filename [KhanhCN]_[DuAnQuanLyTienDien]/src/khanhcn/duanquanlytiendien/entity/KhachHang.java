@@ -23,6 +23,8 @@ public class KhachHang {
 		this.maCT = maCT;
 	}
 
+	
+
 	public String getMaKH() {
 		return maKH;
 	}

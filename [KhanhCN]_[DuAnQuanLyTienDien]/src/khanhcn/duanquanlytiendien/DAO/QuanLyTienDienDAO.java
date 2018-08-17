@@ -119,15 +119,6 @@ public class QuanLyTienDienDAO {
 		ArrayList<KhachHang> dsKH = new ArrayList<KhachHang>();
 
 		try {
-			// String queryString = "SELECT khanhhang.makh, khanhhang.tenkh,
-			// khanhhang.diachi, khanhhang.mact, phuong.tenphuong, quan.tenquan,
-			// khanhhang.dienthoai,khanhhang.email\r\n" +
-			// "FROM khanhhang\r\n" +
-			// "INNER JOIN phuong\r\n" +
-			// "ON (khanhhang.phuong = phuong.idquan)\r\n" +
-			// "INNER JOIN quan\r\n" +
-			// "ON (khanhhang.quan = quan.id)\r\n" +
-			// "";
 			String queryString = "SELECT * FROM khanhhang";
 			PreparedStatement statement = conn.prepareStatement(queryString);
 
@@ -239,6 +230,58 @@ public class QuanLyTienDienDAO {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	/////////////// BCDS//////////////////
+	
+	public static ResultSet getMaCTBL() {
+		try {
+			String sql = "select mact from bienlai";
+			PreparedStatement statement = (PreparedStatement) conn.prepareStatement(sql);
+
+			ResultSet result = statement.executeQuery();
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public ArrayList<KhachHang> getDSBCKhachHang(String maPhuong) {
+
+		ArrayList<KhachHang> dsBCKH = new ArrayList<KhachHang>();
+
+		try {
+			String queryString = "SELECT khanhhang.makh, khanhhang.tenkh ,khanhhang.mact, khanhhang.diachi,quan.tenquan, phuong.tenphuong, khanhhang.dienthoai ,\r\n" + 
+					"khanhhang.email FROM khanhhang INNER JOIN quan ON khanhhang.quan = quan.id JOIN phuong ON khanhhang.phuong = phuong.idphuong WHERE phuong.tenphuong LIKE ?";
+
+			PreparedStatement statement = conn.prepareStatement(queryString);
+			statement.setString(1, "%" + maPhuong + "%");
+			ResultSet result = statement.executeQuery();
+
+			while (result.next()) {
+
+				String maKH = result.getString("makh");
+				String tenKH = result.getString("tenkh");
+				String diaChi = result.getString("diachi");
+				String maCT = result.getString("mact");
+				
+				int quan = result.getInt("tenquan");
+				String quanKH = String.valueOf(quan);
+				System.out.println(quanKH);
+				
+				int phuong = result.getInt("tenphuong");
+				String phuongKH = String.valueOf(phuong);
+				String dienThoai = result.getString("dienthoai");
+				String email = result.getString("email");
+
+				dsBCKH.add(new KhachHang(maKH, tenKH, diaChi, maCT, quan, phuong, dienThoai, email));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return dsBCKH;
 	}
 
 }

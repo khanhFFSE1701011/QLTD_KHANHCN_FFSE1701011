@@ -40,15 +40,19 @@ import khanhcn.duanquanlytiendien.entity.QuanPhuong;
 public class KhachHangUi extends JFrame {
 
 	static QuanLyTienDienDAO QLTD = new QuanLyTienDienDAO();
-	ArrayList<QuanPhuong> dSPhuong = new ArrayList<QuanPhuong>();
-	ArrayList<KhachHang> dsKH = new ArrayList<KhachHang>();
+	static ArrayList<QuanPhuong> dSPhuong = new ArrayList<QuanPhuong>();
+	static ArrayList<KhachHang> dsKH = new ArrayList<KhachHang>();
 	static Connection conn = QLTD.getConnect("localhost", "khanhcn_ffse1701011", "khanhcn", "123456");
 
 	DefaultTableModel dm;
 	JTable tbl;
 	JComboBox<Object> cbo;
-	private JComboBox<QuanPhuong> cboQuan, cboPhuong;
 	JScrollPane sc;
+
+	// JComboBox QUẬN PHƯỜNG
+	private JComboBox<QuanPhuong> cboQuan, cboPhuong;
+
+	// CÁC JTextField KHÁCH HÀNG
 	JTextField txtMaKH;
 	JTextField txtTenKH;
 	JTextField txtDiaChi;
@@ -58,11 +62,14 @@ public class KhachHangUi extends JFrame {
 	JTextField txtDienThoai;
 	JTextField txtEmail;
 
+	// BUTTON CRUD
 	JButton btnThem = new JButton("      Thêm");
 	JButton btnSua = new JButton("   Sửa");
 	JButton btnXoa = new JButton("   Xóa");
 	JButton btnReset = new JButton("        Reset");
 	JButton btnThoat = new JButton("    Thoát");
+
+	// DANH MỤC
 	JButton khachHang = new JButton("         KHÁCH HÀNG");
 	JButton bienLai = new JButton("  BIÊN LAI");
 	JButton TKBC = new JButton("       TK BÁO CÁO");
@@ -73,6 +80,7 @@ public class KhachHangUi extends JFrame {
 	BCDSKhachHangUi myBCDSKH = new BCDSKhachHangUi();
 	BCTHTieuThu myBCTHTT = new BCTHTieuThu();
 
+	// CÁC JPanel CHÍNH
 	JPanel pnCenter = new JPanel();
 	JPanel pnCenterCon = new JPanel();
 	JPanel pnSouth = new JPanel();
@@ -92,11 +100,12 @@ public class KhachHangUi extends JFrame {
 		 */
 	}
 
+	// HIỂN THỊ DANH SÁCH KH
 	public void hienThiDS() {
 
 		dsKH = QLTD.getDSKhachHang();
 		dSPhuong = QLTD.getQuanKH();
-		// dSPhuong = tienDienDao.getPhuongKH();
+
 		for (int i = 0; i < dsKH.size(); i++) {
 			dm.addRow(new String[] { dsKH.get(i).getMaKH(), dsKH.get(i).getHoTen(), dsKH.get(i).getDiaChi(),
 					dsKH.get(i).getMaCT(), QuanLyTienDienDAO.getNamePhuong(dsKH.get(i).getPhuong()),
@@ -107,7 +116,7 @@ public class KhachHangUi extends JFrame {
 
 	}
 
-	// Add khách hàng
+	// THÊM KHÁCH HÀNG
 	public void addKhachHang() {
 
 		String maKH = txtMaKH.getText();
@@ -117,9 +126,9 @@ public class KhachHangUi extends JFrame {
 
 		String quan = cboQuan.getSelectedItem().toString();
 		int idquan = ((QuanPhuong) cboQuan.getSelectedItem()).getId();
-		int idphuong = ((QuanPhuong) cboPhuong.getSelectedItem()).getId();
 
 		String phuong = cboPhuong.getSelectedItem().toString();
+		int idphuong = ((QuanPhuong) cboPhuong.getSelectedItem()).getId();
 
 		String dienThoai = txtDienThoai.getText();
 		String email = txtEmail.getText();
@@ -129,7 +138,7 @@ public class KhachHangUi extends JFrame {
 		dm.addRow(new String[] { maKH, tenKH, diaChi, maCT, phuong, quan, dienThoai, email });
 	}
 
-	// Xoa khách hàng
+	// XÓA KHÁCH HÀNG
 	public void deleteKhachHang(KhachHang kh) {
 
 		String maKH = txtMaKH.getText();
@@ -139,9 +148,9 @@ public class KhachHangUi extends JFrame {
 
 		String quan = cboQuan.getSelectedItem().toString();
 		int idquan = ((QuanPhuong) cboQuan.getSelectedItem()).getId();
-		int idphuong = ((QuanPhuong) cboPhuong.getSelectedItem()).getId();
 
 		String phuong = cboPhuong.getSelectedItem().toString();
+		int idphuong = ((QuanPhuong) cboPhuong.getSelectedItem()).getId();
 
 		String dienThoai = txtDienThoai.getText();
 		String email = txtEmail.getText();
@@ -155,6 +164,7 @@ public class KhachHangUi extends JFrame {
 		QuanLyTienDienDAO.delete(new KhachHang(maKH, tenKH, diaChi, maCT, idquan, idphuong, dienThoai, email));
 	}
 
+	// RESRT THÔNG TIN KH
 	public void reset() {
 		txtMaKH.setText("");
 		txtTenKH.setText("");
@@ -165,8 +175,8 @@ public class KhachHangUi extends JFrame {
 		txtEmail.setText("");
 	}
 
+	// EDIT KHÁCH HÀNG
 	public void editKhachHang() {
-
 		String maKH = txtMaKH.getText();
 		String tenKH = txtTenKH.getText();
 		String diaChi = txtDiaChi.getText();
@@ -174,9 +184,9 @@ public class KhachHangUi extends JFrame {
 
 		String quan = cboQuan.getSelectedItem().toString();
 		int idquan = ((QuanPhuong) cboQuan.getSelectedItem()).getId();
-		int idphuong = ((QuanPhuong) cboPhuong.getSelectedItem()).getId();
 
 		String phuong = cboPhuong.getSelectedItem().toString();
+		int idphuong = ((QuanPhuong) cboPhuong.getSelectedItem()).getId();
 
 		String dienThoai = txtDienThoai.getText();
 		String email = txtEmail.getText();
@@ -195,35 +205,37 @@ public class KhachHangUi extends JFrame {
 
 	}
 
+	// SỰ KIỆN MouseListener
 	MouseListener tblUserClick = new MouseListener() {
 
 		public void mouseClicked(MouseEvent e) {
 
 			int row = tbl.getSelectedRow();
+			String[] col = new String[10];
+			col[0] = (String) tbl.getValueAt(row, 0);
+			col[1] = (String) tbl.getValueAt(row, 1);
+			col[2] = (String) tbl.getValueAt(row, 2);
+			col[3] = (String) tbl.getValueAt(row, 3);
+			col[4] = (String) tbl.getValueAt(row, 4);
+			col[5] = (String) tbl.getValueAt(row, 5);
+			col[6] = (String) tbl.getValueAt(row, 6);
+			col[7] = (String) tbl.getValueAt(row, 7);
 
-			String makh = (String) tbl.getValueAt(row, 0);
-			txtMaKH.setText(makh);
-
-			String ten = (String) tbl.getValueAt(row, 1);
-			txtTenKH.setText(ten);
-
-			String diachi = (String) tbl.getValueAt(row, 2);
-			txtDiaChi.setText(diachi);
-
-			String mct = (String) tbl.getValueAt(row, 3);
-			cboPhuong.getSelectedIndex(mct);
-
-			String quan = (String) tbl.getValueAt(row, 4);
-			cboQuan.getSelectedItem(quan);
-
-			String phuong = (String) tbl.getValueAt(row, 5);
-			txtMaCT.setText(phuong);
-
-			String dt = (String) tbl.getValueAt(row, 6);
-			txtDienThoai.setText(dt);
-
-			String email = (String) tbl.getValueAt(row, 7);
-			txtEmail.setText(email);
+			txtMaKH.setText(col[0]);
+			txtTenKH.setText(col[1]);
+			txtDiaChi.setText(col[2]);
+			txtMaCT.setText(col[3]);
+			cboQuan.setSelectedItem(col[4]);
+			cboPhuong.setSelectedItem(col[5]);
+			txtDienThoai.setText(col[6]);
+			txtEmail.setText(col[7]);
+			
+			btnSua.setEnabled(true);
+			btnXoa.setEnabled(true);
+			//btnThem.setEnabled(false);
+			
+		
+			//////////////////////////
 
 		}
 
@@ -252,6 +264,7 @@ public class KhachHangUi extends JFrame {
 		}
 	};
 
+	// GIAO DIỆN KHÁCH HÀNG
 	public void addControls() throws SQLException {
 
 		// Nạp container và add main panel
@@ -485,7 +498,6 @@ public class KhachHangUi extends JFrame {
 		pnCenter.add(btnThoat);
 
 		// add button
-
 		pnActions.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 		pnActions.add(btnThem);
 		pnActions.add(btnSua);
@@ -532,6 +544,9 @@ public class KhachHangUi extends JFrame {
 		myBCDSKH.setVisible(false);
 		pnCenter.add(myBCTHTT);
 		myBCTHTT.setVisible(false);
+		
+		btnSua.setEnabled(false);
+		btnXoa.setEnabled(false);
 		con.add(pnBorder);
 
 		/*
@@ -541,7 +556,6 @@ public class KhachHangUi extends JFrame {
 	}
 
 	ItemListener chonQuan = new ItemListener() {
-
 		@Override
 		public void itemStateChanged(ItemEvent e) {
 			if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -555,8 +569,8 @@ public class KhachHangUi extends JFrame {
 		int itemPhuong = cboPhuong.getItemCount();
 		for (int i = 0; i < itemPhuong; i++) {
 			cboPhuong.removeItemAt(0);
-
 		}
+
 		QuanPhuong itemID = (QuanPhuong) cboQuan.getSelectedItem();
 		int iD = itemID.getId();
 		dSPhuong = QLTD.getPhuongKH(iD);
@@ -577,7 +591,7 @@ public class KhachHangUi extends JFrame {
 
 	// search
 
-	// add customer
+	// Event add customer
 	ActionListener btnAddClick = new ActionListener() {
 
 		@Override
@@ -611,7 +625,7 @@ public class KhachHangUi extends JFrame {
 		}
 	};
 
-	// edit customer
+	// Event edit customer
 	ActionListener btnEditClick = new ActionListener() {
 
 		public void actionPerformed(ActionEvent e) {
@@ -655,7 +669,7 @@ public class KhachHangUi extends JFrame {
 
 	};
 
-	// delete customer
+	// Event delete customer
 	ActionListener btnDeleteClick = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			if (tbl.getSelectedRow() == -1) {
@@ -675,9 +689,24 @@ public class KhachHangUi extends JFrame {
 
 	};
 
+	// Event Exit
+	// Event delete customer
+	ActionListener btnExitClick = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+
+			int exit = JOptionPane.showConfirmDialog(null, "Thoát chương trình?", "Thoát", JOptionPane.YES_NO_OPTION);
+
+			if (exit == JOptionPane.YES_OPTION) {
+				System.exit(0);
+			}
+		}
+
+	};
+
 	// SetVisible Khách Hàng
 	ActionListener btnKhachHangClick = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
+			reset();
 			myBienLai.setVisible(false);
 			pnCenterCon.setVisible(true);
 			pnSouth.setVisible(true);
@@ -690,7 +719,7 @@ public class KhachHangUi extends JFrame {
 
 	ActionListener btnBienLaiClick = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-
+			
 			myBienLai.setVisible(true);
 			pnCenterCon.setVisible(false);
 			pnSouth.setVisible(false);
@@ -734,10 +763,12 @@ public class KhachHangUi extends JFrame {
 			pnActions.setVisible(false);
 			myBCDSKH.setVisible(false);
 			myBCTHTT.setVisible(true);
+			
 		}
 
 	};
 
+	// CHECK MÃ CT
 	public static boolean checkMaCT(String maCT) throws SQLException {
 		ResultSet maCTKH = QuanLyTienDienDAO.getMaCT();
 		while (maCTKH.next()) {
@@ -748,11 +779,13 @@ public class KhachHangUi extends JFrame {
 		return false;
 	}
 
+	// CHECK MAIL
 	public static boolean checkEmail(String email) {
 		String ktEmail = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 		return email.matches(ktEmail);
 	}
 
+	// CHECK PHONE
 	public static boolean checkPhoneNumber(String phoneNumber) {
 		String ktPhone = "(\\+84|0)\\d{9,10}";
 		return phoneNumber.matches(ktPhone);
@@ -766,6 +799,7 @@ public class KhachHangUi extends JFrame {
 		hienThiDS();
 	}
 
+	// EVENT KHÁCH HÀNG
 	public void addEvents() {
 		khachHang.addActionListener(btnKhachHangClick);
 		bienLai.addActionListener(btnBienLaiClick);
@@ -776,6 +810,7 @@ public class KhachHangUi extends JFrame {
 		btnSua.addActionListener(btnEditClick);
 		btnXoa.addActionListener(btnDeleteClick);
 		btnReset.addActionListener(btnResetClick);
+		btnThoat.addActionListener(btnExitClick);
 		// cboQuan.addActionListener(eventQuan1);
 		tbl.addMouseListener(tblUserClick);
 

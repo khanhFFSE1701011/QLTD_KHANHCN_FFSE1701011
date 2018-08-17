@@ -1,17 +1,18 @@
 package khanhcn.duanquanlytiendien.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Properties;
 
 import javax.swing.BorderFactory;
@@ -35,6 +36,10 @@ import com.mysql.jdbc.PreparedStatement;
 import khanhcn.duanquanlytiendien.DAO.QuanLyTienDienDAO;
 
 public class BienLaiUi extends JPanel {
+	static int chiSoCu;
+	static int chiSoMoi;
+	private DateFormat dateFormat;
+	private Date date;
 	static QuanLyTienDienDAO QLTD = new QuanLyTienDienDAO();
 	static Connection conn = QLTD.getConnect("localhost", "khanhcn_ffse1701011", "khanhcn", "123456");
 	private JTable tbl;
@@ -49,10 +54,13 @@ public class BienLaiUi extends JPanel {
 	JTextField tfMaKH;
 	JTextField tfTenKH;
 	JTextField tfDiaChi;
+	JTextField tfMaCT;
 	JTextField tfPhuong;
 	JTextField tfQuan;
-	JTextField tfDienThoai;
-	JTextField tfEmail;
+	JTextField tfChuKy;
+	JTextField tfCTcu;
+	JTextField tfThang;
+	JTextField tfNam;
 
 	public void getConnect(String strServer, String strDatabase, String strUser, String strPwd) {
 		String strConnect = "jdbc:mysql://" + strServer + "/" + strDatabase
@@ -68,59 +76,86 @@ public class BienLaiUi extends JPanel {
 		}
 	}
 
-	public void search() {
-		try {
+	public void search() throws SQLException {
+		if (!checkMaCT(txtCSCT.getText())) {
 
-			String str = txtMaCT.getText();
+			try {
 
-			Connection conn = QLTD.getConnect("localhost", "khanhcn_ffse1701011", "khanhcn", "123456");
-			PreparedStatement st = (PreparedStatement) conn.prepareStatement("select * from khanhhang where mact=?");
+				String str = txtMaCT.getText();
 
-			st.setString(1, str);
+				PreparedStatement st = (PreparedStatement) conn.prepareStatement(
+						"SELECT khanhhang.makh, khanhhang.tenkh , khanhhang.diachi, khanhhang.dienthoai , bienlai.mact, bienlai.thang, bienlai.nam , bienlai.chisoct FROM khanhhang INNER JOIN bienlai ON khanhhang.mact = bienlai.mact WHERE bienlai.mact=?");
+				st.setString(1, str);
+				ResultSet rs = st.executeQuery();
 
-			// Excuting Query
+				if (rs.next()) {
 
-			ResultSet rs = st.executeQuery();
+					String s = rs.getString(1);
 
-			if (rs.next()) {
+					String s1 = rs.getString(2);
 
-				String s = rs.getString(2);
+					String s2 = rs.getString(3);
 
-				String s1 = rs.getString(3);
+					String s3 = rs.getString(5);
 
-				String s2 = rs.getString(4);
+					String s4 = rs.getString(6);
+					
+					String s5 = rs.getString(7);
 
-				String s3 = rs.getString(6);
+					chiSoCu = rs.getInt(8);
+					String ctCu = String.valueOf(chiSoCu);
 
-				String s4 = rs.getString(7);
+					// Sets Records in TextFields.
 
-				String s5 = rs.getString(8);
+					tfMaKH.setText(s);
+					tfTenKH.setText(s1);
+					tfDiaChi.setText(s2);
+					tfMaCT.setText(s3);
+					tfChuKy.setText(s4 +"-"+ s5);
+					tfCTcu.setText(ctCu);
 
-				String s6 = rs.getString(9);
+				} else {
 
-				// Sets Records in TextFields.
+					// System.out.println(2);
+					String str1 = txtMaCT.getText();
 
-				tfMaKH.setText(s);
-				tfTenKH.setText(s1);
-				tfDiaChi.setText(s2);
-				tfPhuong.setText(s3);
-				tfQuan.setText(s4);
-				tfDienThoai.setText(s5);
-				tfEmail.setText(s6);
+					PreparedStatement st1 = (PreparedStatement) conn
+							.prepareStatement("SELECT * FROM khanhhang WHERE mact = ?");
 
-			} else {
+					st1.setString(1, str1);
 
-				JOptionPane.showMessageDialog(null, "Khách hàng ko tồn tại !");
+					// Excuting Query
+					ResultSet rs1 = st1.executeQuery();
+
+					if (rs1.next()) {
+
+						String s1 = rs1.getString(2);
+						String s2 = rs1.getString(3);
+						String s3 = rs1.getString(4);
+						String s4 = rs1.getString(5);
+
+						// Sets Records in TextFields.
+
+						tfMaKH.setText(s1);
+						tfTenKH.setText(s2);
+						tfDiaChi.setText(s3);
+						tfMaCT.setText(s4);
+						tfChuKy.setText("Chưa có ! ");
+						tfCTcu.setText("0");
+
+					} else {
+
+						JOptionPane.showMessageDialog(null, "Mã CT không tồn tại ! Vui lòng thử lại ");
+					}
+
+				}
+			} catch (Exception ex) {
+
+				System.out.println(ex);
 
 			}
-
-			// Create Exception Handler
-
-		} catch (Exception ex) {
-
-			System.out.println(ex);
-
 		}
+
 	}
 
 	public BienLaiUi() {
@@ -143,12 +178,13 @@ public class BienLaiUi extends JPanel {
 		pnLeft.setForeground(Color.RED);
 		pnLeft.setLayout(new BoxLayout(pnLeft, BoxLayout.Y_AXIS));
 
-		// Tạo panel mãSV chứa dòng chữ mãSV
+		// Tạo panel MCT
 		JPanel pnMaCT = new JPanel();
 		JLabel lblMaCT = new JLabel("  Mã CT       :");
 		txtMaCT = new JTextField();
-		txtMaCT.setPreferredSize(new Dimension(158, 28));
-		btnSearch = new JButton("Tìm kiếm");
+		txtMaCT.setPreferredSize(new Dimension(100, 28));
+		btnSearch = new JButton("Tìm");
+		btnSearch.setPreferredSize(new Dimension(55, 28));
 		pnMaCT.add(lblMaCT);
 		pnMaCT.add(txtMaCT);
 		pnMaCT.add(btnSearch);
@@ -159,6 +195,12 @@ public class BienLaiUi extends JPanel {
 		JLabel lbldate = new JLabel("Ngày nhập :");
 		txtNgayNhap = new JTextField();
 		txtNgayNhap.setPreferredSize(new Dimension(158, 28));
+		dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+		Date ngaynhapCT = new Date();
+		date = new Date();
+		txtNgayNhap.setText(dateFormat.format(date));
+
+		txtNgayNhap.setEnabled(false);
 		pnNgayNhap.add(lbldate);
 		pnNgayNhap.add(txtNgayNhap);
 		pnLeft.add(pnNgayNhap);
@@ -171,15 +213,13 @@ public class BienLaiUi extends JPanel {
 		pnChisoCT.add(txtCSCT);
 		pnLeft.add(pnChisoCT);
 
-		JPanel pnRight = new JPanel();
-		pnRight.setLayout(new BoxLayout(pnRight, BoxLayout.Y_AXIS));
-
 		// Tạo JComboBox chứa các tháng
 		JPanel pnListmonth = new JPanel();
 		JLabel lblmonth = new JLabel("Chọn tháng:  ");
 
 		cbo = new JComboBox<String>();
-		cbo.setPreferredSize(new Dimension(60, 28));
+		cbo.setPreferredSize(new Dimension(90, 28));
+		cbo.addItem("Chọn tháng");
 		cbo.addItem("1");
 		cbo.addItem("2");
 		cbo.addItem("3");
@@ -195,13 +235,30 @@ public class BienLaiUi extends JPanel {
 
 		pnListmonth.add(lblmonth);
 		pnListmonth.add(cbo);
-		pnRight.add(pnListmonth);
+		pnLeft.add(pnListmonth);
 
-		// Thông tin khách hàng
-		// Bọc 4 o bên trái
-		JPanel pnLeft1 = new JPanel();
-		// pnCenterCon.setBackground(Color.GREEN);
-		pnLeft1.setLayout(new BoxLayout(pnLeft1, BoxLayout.Y_AXIS));
+		// Tạo JComboBox chứa các năm
+		JPanel pnListyear = new JPanel();
+		JLabel lblyear = new JLabel("Chọn năm:    ");
+
+		cbo = new JComboBox<String>();
+		cbo.setPreferredSize(new Dimension(90, 28));
+		cbo.addItem("Chọn năm");
+
+		cbo.addItem("2017");
+
+		cbo.addItem("2018");
+
+		cbo.addItem("2019");
+
+		cbo.addItem("2020");
+
+		pnListyear.add(lblyear);
+		pnListyear.add(cbo);
+		pnLeft.add(pnListyear);
+
+		JPanel pnRight = new JPanel();
+		pnRight.setLayout(new BoxLayout(pnRight, BoxLayout.Y_AXIS));
 
 		// Mã khách hàng
 		JPanel pnMaKH = new JPanel();
@@ -210,7 +267,7 @@ public class BienLaiUi extends JPanel {
 		tfMaKH.setPreferredSize(new Dimension(158, 28));
 		pnMaKH.add(lblMaKH);
 		pnMaKH.add(tfMaKH);
-		pnLeft1.add(pnMaKH);
+		pnRight.add(pnMaKH);
 
 		// Tên khách hàng
 		JPanel pnTenKH = new JPanel();
@@ -219,7 +276,7 @@ public class BienLaiUi extends JPanel {
 		tfTenKH.setPreferredSize(new Dimension(158, 28));
 		pnTenKH.add(lblTenKH);
 		pnTenKH.add(tfTenKH);
-		pnLeft1.add(pnTenKH);
+		pnRight.add(pnTenKH);
 
 		// Địa chỉ khách hàng
 		JPanel pnDiaChi = new JPanel();
@@ -228,52 +285,46 @@ public class BienLaiUi extends JPanel {
 		tfDiaChi.setPreferredSize(new Dimension(158, 28));
 		pnDiaChi.add(lblDiaChi);
 		pnDiaChi.add(tfDiaChi);
-		pnLeft1.add(pnDiaChi);
+		pnRight.add(pnDiaChi);
 
-		JPanel pnRight1 = new JPanel();
-		pnRight1.setLayout(new BoxLayout(pnRight1, BoxLayout.Y_AXIS));
-
-		// Tạo JComboBox chứ các Quận
-		JPanel pnQuan = new JPanel();
-		JLabel lblQuan = new JLabel("Chọn Quận:        ");
-		tfQuan = new JTextField();
-		tfQuan.setPreferredSize(new Dimension(158, 28));
-		pnQuan.add(lblQuan);
-		pnQuan.add(tfQuan);
-		pnRight1.add(pnQuan);
-
-		// Tạo JComboBox chứ các Phường
-		JPanel pnPhuong = new JPanel();
-		JLabel lblPhuong = new JLabel("Chọn Phường:   ");
-		tfPhuong = new JTextField();
-		tfPhuong.setPreferredSize(new Dimension(158, 28));
-		pnPhuong.add(lblPhuong);
-		pnPhuong.add(tfPhuong);
-		pnRight1.add(pnPhuong);
+		// Tạo panel MCT
+		JPanel pnMaCT1 = new JPanel();
+		JLabel lblMaCT1 = new JLabel("  Mã CT: ");
+		tfMaCT = new JTextField();
+		tfMaCT.setPreferredSize(new Dimension(158, 28));
+		pnMaCT1.add(lblMaCT1);
+		pnMaCT1.add(tfMaCT);
+		pnRight.add(pnMaCT1);
 
 		// Điện thoại khách hàng
-		JPanel pnDienThoai = new JPanel();
-		JLabel lblDienThoai = new JLabel("Điện thoại:          ");
-		tfDienThoai = new JTextField();
-		tfDienThoai.setPreferredSize(new Dimension(158, 28));
-		pnDienThoai.add(lblDienThoai);
-		pnDienThoai.add(tfDienThoai);
-		pnRight1.add(pnDienThoai);
+		JPanel pnChuKy = new JPanel();
+		JLabel lblDienThoai = new JLabel("Chu kỳ: ");
+		tfChuKy = new JTextField();
+		tfChuKy.setPreferredSize(new Dimension(158, 28));
+		pnChuKy.add(lblDienThoai);
+		pnChuKy.add(tfChuKy);
+		pnRight.add(pnChuKy);
 
 		// Email khách hàng
 		JPanel pnEmail = new JPanel();
-		JLabel lblEmail = new JLabel("Email KH:            ");
-		tfEmail = new JTextField();
-		tfEmail.setPreferredSize(new Dimension(158, 28));
+		JLabel lblEmail = new JLabel("CT Cũ:    ");
+		tfCTcu = new JTextField();
+		tfCTcu.setPreferredSize(new Dimension(158, 28));
 		pnEmail.add(lblEmail);
-		pnEmail.add(tfEmail);
-		pnRight1.add(pnEmail);
-
-		pnContent.add(pnLeft1);
-		pnContent.add(pnRight1);
-		pnMain.add(pnContent);
+		pnEmail.add(tfCTcu);
+		pnRight.add(pnEmail);
 
 		// button CRUD
+
+		/*
+		 * JButton btnNhapBL = new JButton("          Nhập BL");
+		 * btnNhapBL.setPreferredSize(new Dimension(100, 50)); btnNhapBL.setMargin(new
+		 * Insets(0, 5, 0, 0)); ImageIcon iconNhap = new ImageIcon( new
+		 * ImageIcon("img/bienlai.png").getImage().getScaledInstance(30, 30,
+		 * Image.SCALE_SMOOTH)); JLabel nhap = new JLabel(iconNhap);
+		 * btnNhapBL.add(nhap);
+		 */
+
 		JButton btnThem = new JButton("      Thêm");
 		btnThem.setPreferredSize(new Dimension(100, 50));
 		btnThem.setMargin(new Insets(0, 10, 0, 0));
@@ -310,28 +361,11 @@ public class BienLaiUi extends JPanel {
 		JPanel pnActions = new JPanel();
 		pnLeft.setForeground(Color.BLUE);
 		pnActions.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 0));
+		// pnActions.add(btnNhapBL);
 		pnActions.add(btnThem);
 		pnActions.add(btnSua);
 		pnActions.add(btnXoa);
 		pnActions.add(btnThoat);
-
-		// Tạo JComboBox chứa các năm
-		JPanel pnListyear = new JPanel();
-		JLabel lblyear = new JLabel("Chọn năm:    ");
-
-		cbo = new JComboBox<String>();
-		cbo.setPreferredSize(new Dimension(62, 28));
-		cbo.addItem("2017");
-
-		cbo.addItem("2018");
-
-		cbo.addItem("2019");
-
-		cbo.addItem("2020");
-
-		pnListyear.add(lblyear);
-		pnListyear.add(cbo);
-		pnRight.add(pnListyear);
 
 		// phần Table Biên Lai
 
@@ -376,21 +410,18 @@ public class BienLaiUi extends JPanel {
 
 		ActionListener btnClickSearch = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (txtMaCT.getText().isEmpty()) {
-					JOptionPane.showMessageDialog(null, "Khách hàng không tồn tại !");
-				} else {
+				try {
 					search();
-					pnMaKH.setVisible(true);
-					pnDienThoai.setVisible(true);
-					pnEmail.setVisible(true);
-					pnPhuong.setVisible(true);
-					pnQuan.setVisible(true);
-					pnTenKH.setVisible(true);
-					pnDiaChi.setVisible(true);
-					
-					pnMaCT.setVisible(false);
-					
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
+				pnMaKH.setVisible(true);
+				pnChuKy.setVisible(true);
+				pnEmail.setVisible(true);
+				pnTenKH.setVisible(true);
+				pnDiaChi.setVisible(true);
+				pnMaCT1.setVisible(true);
 
 			}
 
@@ -398,19 +429,27 @@ public class BienLaiUi extends JPanel {
 
 		btnSearch.addActionListener(btnClickSearch);
 
-		pnChisoCT.setVisible(false);
-		pnNgayNhap.setVisible(false);
-		pnListmonth.setVisible(false);
-		pnListyear.setVisible(false);
-
 		pnMaKH.setVisible(false);
-		pnDienThoai.setVisible(false);
+		pnChuKy.setVisible(false);
 		pnEmail.setVisible(false);
-		pnPhuong.setVisible(false);
-		pnQuan.setVisible(false);
 		pnTenKH.setVisible(false);
 		pnDiaChi.setVisible(false);
+		pnMaCT1.setVisible(false);
 
+	}
+	
+	//THÊM BIÊN LAI 
+	
+
+	// CHECK MÃ CT
+	public static boolean checkMaCT(String maCT) throws SQLException {
+		ResultSet maCTKH = QuanLyTienDienDAO.getMaCTBL();
+		while (maCTKH.next()) {
+			if (maCT.equals(maCTKH.getString("mact"))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
